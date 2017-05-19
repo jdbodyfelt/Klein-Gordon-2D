@@ -6,14 +6,16 @@ size_t inline IDX(size_t x, size_t y, size_t z) {
 /******************** Averaging **************************/
 FType mean(FType *A, size_t nA) {
   FType mu = 0.0;
-  for (size_t n = 0; n < nA; n++) mu += A[n];
+  for (size_t n = 0; n < nA; n++)
+    mu += A[n];
   return mu / ((FType)nA);
-}  // Average
+} // Average
 /**************** Standard Deviation *********************/
 FType stdev(FType *A, size_t nA) {
   FType mu = mean(A, nA);
   FType sig = 0.0;
-  for (size_t n = 0; n < nA; n++) sig += pow(A[n] - mu, 2.0);
+  for (size_t n = 0; n < nA; n++)
+    sig += pow(A[n] - mu, 2.0);
   return sqrt(sig / nA);
 }
 /********************************************************/
@@ -41,7 +43,8 @@ KG2D::KG2D(size_t RECL_, FType dt_, FType tmx_, bool log_, FType E0_,
   FType dE = sqrt(2.0 * E0 / (FType)(4.0 * LXh * LYh));
   for (size_t z = 0; z < NZ; z++)
     for (size_t y = NYh - LYh; y < NYh + LYh; y++)
-      for (size_t x = NXh - LXh; x < NXh + LXh; x++) p[IDX(x, y, z)] = dE;
+      for (size_t x = NXh - LXh; x < NXh + LXh; x++)
+        p[IDX(x, y, z)] = dE;
 }
 /********************************************************/
 KG2D::~KG2D(void) {
@@ -141,20 +144,23 @@ void KG2D::NRG_DENSITY(FType *dE) {
 void KG2D::NRG(void) {
   FType *dE = (FType *)calloc(N, sizeof(FType));
   NRG_DENSITY(dE);
-  for (size_t z = 0; z < NZ; z++) E[z] = 0.0;
+  for (size_t z = 0; z < NZ; z++)
+    E[z] = 0.0;
   xyz_loop E[z] += dE[IDX(x, y, z)];
 }
 /********************************************************/
 void KG2D::PRINT_NRG(void) {
   NRG();
   printf("E0=%.8e\n", E0);
-  for (size_t z = 0; z < NZ; z++) printf("E[%lu]=%.8e\n", z, E[z]);
+  for (size_t z = 0; z < NZ; z++)
+    printf("E[%lu]=%.8e\n", z, E[z]);
 }
 /********************************************************/
 void KG2D::PRINT_NRG_ERR(void) {
   NRG();
   FType dE[NZ];
-  for (size_t z = 0; z < NZ; z++) dE[z] = log10(abs((E[z] - E0) / E0) + FPE);
+  for (size_t z = 0; z < NZ; z++)
+    dE[z] = log10(abs((E[z] - E0) / E0) + FPE);
   FType mu = mean(dE, NZ);
   FType sig = stdev(dE, NZ);
   printf("%.4e\t%.4e\t%.4e\t%.4e\n", t, TOC(false), mu, sig);
@@ -177,7 +183,8 @@ void KG2D::Dump2File(std::string fid, bool wipe) {
 void KG2D::TextDump(FType *A, std::string fid, size_t z) {
   FILE *pFile = fopen(fid.c_str(), "w");
   for (size_t x = 0; x < NX; x++) {
-    for (size_t y = 0; y < NY; y++) fprintf(pFile, "%.8e\t", A[IDX(x, y, z)]);
+    for (size_t y = 0; y < NY; y++)
+      fprintf(pFile, "%.8e\t", A[IDX(x, y, z)]);
     fprintf(pFile, "\n");
   }
   fclose(pFile);

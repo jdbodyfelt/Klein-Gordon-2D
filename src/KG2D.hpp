@@ -9,29 +9,29 @@
 #ifndef __KG2D_HPP__
 #define __KG2D_HPP__
 /*************** Library Imports ************************/
-#include <random>
 #include "symplktk.hpp"
+#include <random>
 
 /*************** Macro Definitions **********************/
 // NOTE: Reset w compile flag "-D<VAR>=<VAL>"
 #ifndef NX
-#define NX 256  // Site Count on x-dimension
+#define NX 256 // Site Count on x-dimension
 #endif
 #ifndef NY
-#define NY 256  // Site Count on y-dimension
+#define NY 256 // Site Count on y-dimension
 #endif
 #ifndef NZ
-#define NZ 128  // Statistical Population
+#define NZ 128 // Statistical Population
 #endif
 
 #ifndef PBC
-#define PBC true  // Periodic Boundaries
+#define PBC true // Periodic Boundaries
 #endif
 
-#define k_loop for (size_t k = 0; k < N; k++)
-#define xyz_loop                    \
-  for (size_t z = 0; z < NZ; z++)   \
-    for (size_t y = 0; y < NY; y++) \
+#define k_loop for(size_t k=0; k<N; k++)
+#define xyz_loop                                                               \
+  for (size_t z = 0; z < NZ; z++)                                              \
+    for (size_t y = 0; y < NY; y++)                                            \
       for (size_t x = 0; x < NX; x++)
 
 /******************** Statistics *************************/
@@ -40,7 +40,7 @@ FType mean(FType *A, size_t nA);
 FType stdev(FType *A, size_t nA);
 /*************** Class Definitions **********************/
 class KG2D : public SI_ALG, public TICTOC {
- public:
+public:
   size_t N = NX * NY * NZ;
   FType *u, *p, *eps;
   FType *zeta, *stencil, *E;
@@ -52,9 +52,9 @@ class KG2D : public SI_ALG, public TICTOC {
   void INFO(void);
   // Virtual Inherits from SI_ALG
   void STENCIL_JACOBI5(FType *A);
-  void STEP_A(FType tau);  // U Update
-  void STEP_B(FType tau);  // P Update
-  void STEP_C(FType tau);  // Corrector Update
+  void STEP_A(FType tau); // U Update
+  void STEP_B(FType tau); // P Update
+  void STEP_C(FType tau); // Corrector Update
   void NRG_DENSITY(FType *dE);
   void NRG(void);
   void PRINT_NRG(void);

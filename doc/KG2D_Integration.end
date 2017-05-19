@@ -1,1 +1,0 @@
-\@doendnote{endnote1}{ Note the chain rule gives $\protect \frac  {\partial }{\partial q} \protect \frac  {\left | q \right |^{\sigma + 2}}{\sigma + 2} = \left | q \right |^{\sigma + 1} \protect \frac  {\partial }{\partial q} \left | q \right | = \left | q \right |^{\sigma + 1} \protect \frac  {q}{\left | q \right |} = \left | q \right |^\sigma q$. }
