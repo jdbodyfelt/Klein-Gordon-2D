@@ -1,0 +1,190 @@
+%----------------------------------------------------------------------
+\documentclass[12pt, a4paper, prl]{revtex4}
+\usepackage{amsmath, amssymb, mathtools, esint}
+\usepackage[utf8]{inputenc} 
+\usepackage{graphicx, fancybox}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{rotating}
+%-------------------------------------------------------------------------
+
+\newcommand{\half}{\nicefrac{1}{2}}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\avg}[1]{\langle #1 \rangle}
+\newcommand{\teps}{\tilde \epsilon}
+
+\begin{document}\lstset{language=[95]Fortran}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Integrating the 2-D Klein-Gordon Tangent Map}
+\author{J.D. Bodyfelt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\maketitle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The 2-D Klein-Gordon Hamiltonian is:
+\begin{equation}
+ H = \sum_{x,y} \frac{p_{x,y}^2}{2} + \frac{\epsilon_{x,y} q_{x,y}^2}{2} + \frac{\abs{q_{x,y}}^{\sigma + 2}}{\sigma + 2} - \frac{1}{2W}\left[
+ \left(q_{x+1,y} - q_{x,y} \right)^2 + \left(q_{x,y+1} - q_{x,y} \right)^2 \right]
+\end{equation}
+which is separable into
+\begin{eqnarray*}
+ H &=& T(\vec p) + V(\vec q) \\
+T(\vec p) &=& \sum_{x,y} \frac{p_{x,y}^2}{2}, \\
+V(\vec q) &=& \sum_{x,y} \frac{\epsilon_{x,y} q_{x,y}^2}{2} + \frac{\abs{q_{x,y}}^{\sigma + 2}}{\sigma + 2} - \frac{1}{2W}\left[
+ \left(q_{x+1,y} - q_{x,y} \right)^2 + \left(q_{x,y+1} - q_{x,y} \right)^2 \right]
+\end{eqnarray*}
+Since the Hamiltonian is nicely seperable, we can consider the variationals derived from the 
+\textit{Tangent Dynamic Hamiltonian (TDH)}, defined as
+\begin{equation}
+H_V(\vec{\delta q}, \vec{\delta p}; t) = \sum_{x,y} \frac{\delta p_{x,y}^2}{2} + \sum_{x,y} \sum_{u,v} \left[\mathbf{D}^2V(\vec{q}(t))\right]_{x,y,u,v} \delta q_{x,y} \delta q_{u,v}
+\end{equation}
+where
+\begin{equation*}
+ \left[\mathbf{D}^2V(\vec{q}(t))\right]_{x,y,u,v} = \frac{\partial^2 V}{\partial q_{x,y} \partial q_{u,v}} \Bigg\vert_{{\vec q} = {\vec q}(t)}
+\end{equation*}
+Previously, the first derivative was found to be
+\begin{equation*}
+\frac{\partial V}{\partial q_{x,y}} = \epsilon_{x,y} q_{x,y} + \abs{q_{x,y}}^\sigma q_{x,y}  - \frac{1}{W}\left[ q_{x-1,y} + q_{x+1,y} + q_{x,y-1} + q_{x,y+1} - 4 q_{x,y} \right]
+\end{equation*}
+And the second derivative yields yet again a Jacobi 5-stencil
+\begin{equation*}
+\frac{\partial V}{\partial q_{u,v} \partial q_{x,y}} = \begin{cases}
+                                                        \epsilon_{x,y} + \left(\sigma + 1\right)\abs{q_{x,y}}^\sigma + \frac{4}{W}; &\quad u=x,\; v=y \\
+                                                        -\frac{1}{W}; &\quad u=x\pm1,\; v=y \\
+                                                        -\frac{1}{W}; &\quad u=x,\; v=y\pm1
+                                                       \end{cases}
+\end{equation*}
+Computationally, this is a fairly sparse tensor with only the diagonal depending on the trajectory ${\vec q}(t)$. 
+
+
+
+
+
+
+\newpage
+The former very easily integrates as
+\begin{equation*}
+\partial_t u_{j,k} = \frac{\partial A}{\partial p_{j,k}} = p_{j,k} \quad \mapsto \quad u_{j,k}(t+\tau) = u_{j,k}(t) + \tau p_{j,k}(t)
+\end{equation*}
+For $B$, we'll need to expand to include the full $u_{j,k}$ stencil
+\begin{eqnarray*}
+B &=& \ldots + \frac{\epsilon_{j,k} u_{j,k}^2}{2} + \frac{\abs{u_{j,k}}^{\sigma + 2}}{\sigma + 2} + \ldots \\
+&& - \frac{1}{2W}\left[ \ldots  \left(u_{j,k} - u_{j-1,k} \right)^2  + \left(u_{j+1,k} - u_{j,k} \right)^2 + \left(u_{j,k} - u_{j,k-1} \right)^2  + \left(u_{j,k+1} - u_{j,k} \right)^2 + \ldots \right]
+\end{eqnarray*}
+In the differentiation, note that 
+\begin{equation*}
+\frac{\partial}{\partial u}  \frac{\abs{u}^{\sigma + 2}}{\sigma + 2} = 
+\abs{u}^{\sigma + 1} \frac{\partial}{\partial u} \abs{u} = \abs{u}^{\sigma + 1} \frac{u}{\abs{u}}
+= \abs{u}^\sigma u 
+\end{equation*}
+Differentiating
+\begin{eqnarray*}
+\partial_t p_{j,k} &=& -\frac{\partial B}{\partial u_{j,k}} \\
+ &=& - \epsilon_{j,k} u_{j,k} - \abs{u_{j,k}}^\sigma u_{j,k} + \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) 
+ \end{eqnarray*}
+Giving
+\begin{equation*}
+p_{j,k}(t+\tau) = p_{j,k}(t) - \tau \left[ \epsilon_{j,k} u_{j,k} + \abs{u_{j,k}}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) 
+ \right]
+\end{equation*}
+\subsection{Corrector}
+The corrector step is defined from $C = \{\{A,B\},B\}$. Expanding the brackets gives
+\begin{equation*}
+\{A,B\} = \sum_{j,k} \frac{\partial A}{\partial u_{j,k}}\frac{\partial B}{\partial p_{j,k}} -
+\frac{\partial A}{\partial p_{j,k}}\frac{\partial B}{\partial u_{j,k}} 
+\end{equation*}
+Since we have $A(p)$ and $B(u)$, the first term is zero
+\begin{equation*}
+\{A,B\}  = - \sum_{j,k} 
+\frac{\partial A}{\partial p_{j,k}}\frac{\partial B}{\partial u_{j,k}}
+\end{equation*}
+The fact $\partial_p B = 0$ can be used again to simplify the next bracket
+\begin{eqnarray*}
+\{\{A,B\}, B\} &=& - \sum_{j,k} 
+\frac{\partial}{\partial p_{j,k}}\left(\frac{\partial A}{\partial p_{j,k}}\frac{\partial B}{\partial u_{j,k}} \right)
+\frac{\partial B}{\partial u_{j,k}} \\
+&=&  - \sum_{j,k} 
+\left(\frac{\partial^2 A}{\partial p_{j,k}^2}\frac{\partial B}{\partial u_{j,k}} + 
+\frac{\partial A}{\partial p_{j,k}}\frac{\partial^2 B}{\partial p_{j,k} \partial u_{j,k}} \right)
+\frac{\partial B}{\partial u_{j,k}}
+\end{eqnarray*}
+Previously, it was found
+\begin{equation*}
+\frac{\partial A}{\partial p_{j,k}} = p_{j,k}, \qquad
+\frac{\partial B}{\partial u_{j,k}} =\epsilon_{j,k} u_{j,k} + \abs{u_{j,k}}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) 
+\end{equation*}
+therefore the mixed derivative term goes to zero, giving
+\begin{equation*}
+ \{\{A,B\}, B\} = - \sum_{j,k} \frac{\partial^2 A}{\partial p_{j,k}^2}\left(\frac{\partial B}{\partial u_{j,k}}  
+ \right)^2 
+ \end{equation*}
+ Substituting the previously found values
+ \begin{equation*}
+  C =\{\{A,B\}, B\} = - \sum_{j,k}  \left[
+  \epsilon_{j,k} u_{j,k} + \abs{u_{j,k}}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) 
+  \right]^2
+\end{equation*}
+The corrector's momentum change is 
+\begin{equation*}
+\partial_t p_{j,k} = -\frac{\partial C}{\partial u_{j,k}}
+\end{equation*}
+which in order to do, we'll need to write out the full $u_{j,k}$ stencil. This is easily done
+by considering the variable 
+\begin{equation*}
+\zeta_{j,k} = 
+  \epsilon_{j,k} u_{j,k} + \abs{u_{j,k}}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) 
+\end{equation*}
+Note that $\zeta_{j,k}$ contains the $u_{j,k}$ stencil. We can expand $C$ to a $\zeta_{j,k}$ stencil
+\begin{eqnarray*}
+C &=& \ldots -  \zeta_{j-1,k}^2 - \zeta_{j+1,k}^2 - \zeta_{j,k-1}^2 - \zeta_{j,k+1}^2 - \zeta_{j,k}^2 - \ldots  
+\end{eqnarray*}
+In this expansion, ever instance of $u_{j,k}$ is present, so then
+\begin{eqnarray*}
+ \partial_t p_{j,k} &=& -\frac{\partial C}{\partial u_{j,k}} \\
+ &=& 2 \zeta_{j-1,k} \frac{\partial\zeta_{j-1,k}}{\partial u_{j,k}} + 
+ 2\zeta_{j+1,k} \frac{\partial\zeta_{j+1,k}}{\partial u_{j,k}} +
+ 2 \zeta_{j,k-1}\frac{\partial\zeta_{j,k-1}}{\partial u_{j,k}} + 
+ 2 \zeta_{j,k+1}\frac{\partial\zeta_{j,k+1}}{\partial u_{j,k}} + 
+ 2 \zeta_{j,k}\frac{\partial\zeta_{j,k}}{\partial u_{j,k}}
+\end{eqnarray*}
+Looking term by term
+\begin{eqnarray*}
+\zeta_{j,k} &=& \epsilon_{j,k} u_{j,k} + \abs{u_{j,k}}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) \\
+\zeta_{j-1,k} &=& \epsilon_{j-1,k} u_{j-1,k} + \abs{u_{j-1,k}}^\sigma u_{j-1,k} - \frac{1}{W}\left( u_{j-2,k} + u_{j,k} + u_{j-1,k-1} + u_{j-1,k+1} - 4u_{j-1,k} \right) \\
+\zeta_{j+1,k} &=& \epsilon_{j+1,k} u_{j+1,k} + \abs{u_{j+1,k}}^\sigma u_{j+1,k} - \frac{1}{W}\left( u_{j,k} + u_{j+2,k} + u_{j+1,k-1} + u_{j+1,k+1} - 4u_{j+1,k} \right) \\
+\zeta_{j,k-1} &=& \epsilon_{j,k-1} u_{j,k-1} + \abs{u_{j,k-1}}^\sigma u_{j,k-1} - \frac{1}{W}\left( u_{j-1,k-1} + u_{j+1,k-1} + u_{j,k-2} + u_{j,k} - 4u_{j,k-1} \right) \\
+\zeta_{j,k+1} &=& \epsilon_{j,k+1} u_{j,k+1} + \abs{u_{j,k+1}}^\sigma u_{j,k+1} - \frac{1}{W}\left( u_{j-1,k+1} + u_{j+1,k+1} + u_{j,k} + u_{j,k+2} - 4u_{j,k+1} \right) 
+\end{eqnarray*}
+And noting the derivative
+\begin{equation*}
+\frac{\partial}{\partial u} \abs{u}^\sigma u = \sigma \abs{u}^{\sigma -1} \frac{\partial \abs{u}}{\partial u} u + \abs{u}^\sigma  = \left(\sigma + 1\right) \abs{u}^\sigma
+\end{equation*}
+We then have
+\begin{eqnarray*}
+\frac{\partial\zeta_{j,k}}{\partial u_{j,k}} &=& \epsilon_{j,k}  + \left(\sigma +1\right) \abs{u_{j,k}}^\sigma + \frac{4}{W} \\
+\frac{\partial\zeta_{j\pm 1,k}}{\partial u_{j,k}} &=&
+\frac{\partial\zeta_{j,k\pm 1}}{\partial u_{j,k}} = -\frac{1}{W} 
+\end{eqnarray*}
+And finally
+\begin{equation*}
+ \partial_t p_{j,k} =
+ - \frac{2}{W} \left( \zeta_{j-1,k} + \zeta_{j+1,k} + \zeta_{j,k-1} + \zeta_{j,k+1} \right)
++
+ 2 \zeta_{j,k} \left( \epsilon_{j,k}  + \left(\sigma +1\right) \abs{u_{j,k}}^\sigma + \frac{4}{W} \right)
+\end{equation*}
+which can be re-written as
+\begin{equation*}
+ \partial_t p_{j,k} =
+  2 \Big(\epsilon_{j,k}  + \left(\sigma +1\right) \abs{u_{j,k}}^\sigma \Big) \zeta_{j,k} 
+ - \frac{2}{W} \left( \zeta_{j-1,k} + \zeta_{j+1,k} + \zeta_{j,k-1} + \zeta_{j,k+1} - 4 \zeta_{j,k} \right)
+\end{equation*}
+which is then simply updated 
+\begin{equation*}
+p(t+\tau) = p(t) + 2\tau \left[  \Big(\epsilon_{j,k}  + \left(\sigma +1\right) \abs{u_{j,k}}^\sigma \Big) \zeta_{j,k} 
+ - \frac{1}{W}\left( \zeta_{j-1,k} + \zeta_{j+1,k} + \zeta_{j,k-1} + \zeta_{j,k+1} - 4 \zeta_{j,k} \right)\right]
+\end{equation*}
+
+
+\begin{thebibliography}{99}
+\end{thebibliography}
+\end{document}

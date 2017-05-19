@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="J.D. Bodyfelt" />
+  <title>Integrating the 2-D Klein-Gordon</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+</head>
+<body>
+<div id="header">
+<h1 class="title">Integrating the 2-D Klein-Gordon</h1>
+<h2 class="author">J.D. Bodyfelt</h2>
+</div>
+<p>The 2-D Klein-Gordon Hamiltonian is: <span class="math display">\[H = \sum_{j,k} \frac{p_{j,k}^2}{2} + \frac{\epsilon_{j,k} u_{j,k}^2}{2} + \frac{{\left| u_{j,k} \right|}^{\sigma + 2}}{\sigma + 2} - \frac{1}{2W}\left[
+ \left(u_{j+1,k} - u_{j,k} \right)^2 + \left(u_{j,k+1} - u_{j,k} \right)^2 \right]\]</span> which is separable into <span class="math display">\[\begin{aligned}
+ H &amp;=&amp; A(\vec p) + B(\vec u) \\
+A(\vec p) &amp;=&amp; \sum_{j,k} \frac{p_{j,k}^2}{2}, \\
+B(\vec u) &amp;=&amp; \sum_{j,k} \frac{\epsilon_{j,k} u_{j,k}^2}{2} + \frac{{\left| u_{j,k} \right|}^{\sigma + 2}}{\sigma + 2} - \frac{1}{2W}\left[
+ \left(u_{j+1,k} - u_{j,k} \right)^2 + \left(u_{j,k+1} - u_{j,k} \right)^2 \right]\end{aligned}\]</span> The former very easily integrates as <span class="math display">\[\partial_t u_{j,k} = \frac{\partial A}{\partial p_{j,k}} = p_{j,k} \quad \mapsto \quad u_{j,k}(t+\tau) = u_{j,k}(t) + \tau p_{j,k}(t)\]</span> For <span class="math inline">\(B\)</span>, we’ll need to expand to include the full <span class="math inline">\(u_{j,k}\)</span> stencil <span class="math display">\[\begin{aligned}
+B &amp;=&amp; \ldots + \frac{\epsilon_{j,k} u_{j,k}^2}{2} + \frac{{\left| u_{j,k} \right|}^{\sigma + 2}}{\sigma + 2} + \ldots \\
+&amp;&amp; - \frac{1}{2W}\left[ \ldots  \left(u_{j,k} - u_{j-1,k} \right)^2  + \left(u_{j+1,k} - u_{j,k} \right)^2 + \left(u_{j,k} - u_{j,k-1} \right)^2  + \left(u_{j,k+1} - u_{j,k} \right)^2 + \ldots \right]\end{aligned}\]</span> In the differentiation, note that <span class="math display">\[\frac{\partial}{\partial u}  \frac{{\left| u \right|}^{\sigma + 2}}{\sigma + 2} = 
+{\left| u \right|}^{\sigma + 1} \frac{\partial}{\partial u} {\left| u \right|} = {\left| u \right|}^{\sigma + 1} \frac{u}{{\left| u \right|}}
+= {\left| u \right|}^\sigma u\]</span> Differentiating <span class="math display">\[\begin{aligned}
+\partial_t p_{j,k} &amp;=&amp; -\frac{\partial B}{\partial u_{j,k}} \\
+ &amp;=&amp; - \epsilon_{j,k} u_{j,k} - {\left| u_{j,k} \right|}^\sigma u_{j,k} + \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) 
+ \end{aligned}\]</span> Giving <span class="math display">\[p_{j,k}(t+\tau) = p_{j,k}(t) - \tau \left[ \epsilon_{j,k} u_{j,k} + {\left| u_{j,k} \right|}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) 
+ \right]\]</span></p>
+<h2 id="corrector">Corrector</h2>
+<p>The corrector step is defined from <span class="math inline">\(C = \{\{A,B\},B\}\)</span>. Expanding the brackets gives <span class="math display">\[\{A,B\} = \sum_{j,k} \frac{\partial A}{\partial u_{j,k}}\frac{\partial B}{\partial p_{j,k}} -
+\frac{\partial A}{\partial p_{j,k}}\frac{\partial B}{\partial u_{j,k}}\]</span> Since we have <span class="math inline">\(A(p)\)</span> and <span class="math inline">\(B(u)\)</span>, the first term is zero <span class="math display">\[\{A,B\}  = - \sum_{j,k} 
+\frac{\partial A}{\partial p_{j,k}}\frac{\partial B}{\partial u_{j,k}}\]</span> The fact <span class="math inline">\(\partial_p B = 0\)</span> can be used again to simplify the next bracket <span class="math display">\[\begin{aligned}
+\{\{A,B\}, B\} &amp;=&amp; - \sum_{j,k} 
+\frac{\partial}{\partial p_{j,k}}\left(\frac{\partial A}{\partial p_{j,k}}\frac{\partial B}{\partial u_{j,k}} \right)
+\frac{\partial B}{\partial u_{j,k}} \\
+&amp;=&amp;  - \sum_{j,k} 
+\left(\frac{\partial^2 A}{\partial p_{j,k}^2}\frac{\partial B}{\partial u_{j,k}} + 
+\frac{\partial A}{\partial p_{j,k}}\frac{\partial^2 B}{\partial p_{j,k} \partial u_{j,k}} \right)
+\frac{\partial B}{\partial u_{j,k}}\end{aligned}\]</span> Previously, it was found <span class="math display">\[\frac{\partial A}{\partial p_{j,k}} = p_{j,k}, \qquad
+\frac{\partial B}{\partial u_{j,k}} =\epsilon_{j,k} u_{j,k} + {\left| u_{j,k} \right|}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right)\]</span> therefore the mixed derivative term goes to zero, giving <span class="math display">\[\{\{A,B\}, B\} = - \sum_{j,k} \frac{\partial^2 A}{\partial p_{j,k}^2}\left(\frac{\partial B}{\partial u_{j,k}}  
+ \right)^2\]</span> Substituting the previously found values <span class="math display">\[C =\{\{A,B\}, B\} = - \sum_{j,k}  \left[
+  \epsilon_{j,k} u_{j,k} + {\left| u_{j,k} \right|}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) 
+  \right]^2\]</span> The corrector’s momentum change is <span class="math display">\[\partial_t p_{j,k} = -\frac{\partial C}{\partial u_{j,k}}\]</span> which in order to do, we’ll need to write out the full <span class="math inline">\(u_{j,k}\)</span> stencil. This is easily done by considering the variable <span class="math display">\[\zeta_{j,k} = 
+  \epsilon_{j,k} u_{j,k} + {\left| u_{j,k} \right|}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right)\]</span> Note that <span class="math inline">\(\zeta_{j,k}\)</span> contains the <span class="math inline">\(u_{j,k}\)</span> stencil. We can expand <span class="math inline">\(C\)</span> to a <span class="math inline">\(\zeta_{j,k}\)</span> stencil <span class="math display">\[\begin{aligned}
+C &amp;=&amp; \ldots -  \zeta_{j-1,k}^2 - \zeta_{j+1,k}^2 - \zeta_{j,k-1}^2 - \zeta_{j,k+1}^2 - \zeta_{j,k}^2 - \ldots  \end{aligned}\]</span> In this expansion, ever instance of <span class="math inline">\(u_{j,k}\)</span> is present, so then <span class="math display">\[\begin{aligned}
+ \partial_t p_{j,k} &amp;=&amp; -\frac{\partial C}{\partial u_{j,k}} \\
+ &amp;=&amp; 2 \zeta_{j-1,k} \frac{\partial\zeta_{j-1,k}}{\partial u_{j,k}} + 
+ 2\zeta_{j+1,k} \frac{\partial\zeta_{j+1,k}}{\partial u_{j,k}} +
+ 2 \zeta_{j,k-1}\frac{\partial\zeta_{j,k-1}}{\partial u_{j,k}} + 
+ 2 \zeta_{j,k+1}\frac{\partial\zeta_{j,k+1}}{\partial u_{j,k}} + 
+ 2 \zeta_{j,k}\frac{\partial\zeta_{j,k}}{\partial u_{j,k}}\end{aligned}\]</span> Looking term by term <span class="math display">\[\begin{aligned}
+\zeta_{j,k} &amp;=&amp; \epsilon_{j,k} u_{j,k} + {\left| u_{j,k} \right|}^\sigma u_{j,k} - \frac{1}{W}\left( u_{j-1,k} + u_{j+1,k} + u_{j,k-1} + u_{j,k+1} - 4u_{j,k} \right) \\
+\zeta_{j-1,k} &amp;=&amp; \epsilon_{j-1,k} u_{j-1,k} + {\left| u_{j-1,k} \right|}^\sigma u_{j-1,k} - \frac{1}{W}\left( u_{j-2,k} + u_{j,k} + u_{j-1,k-1} + u_{j-1,k+1} - 4u_{j-1,k} \right) \\
+\zeta_{j+1,k} &amp;=&amp; \epsilon_{j+1,k} u_{j+1,k} + {\left| u_{j+1,k} \right|}^\sigma u_{j+1,k} - \frac{1}{W}\left( u_{j,k} + u_{j+2,k} + u_{j+1,k-1} + u_{j+1,k+1} - 4u_{j+1,k} \right) \\
+\zeta_{j,k-1} &amp;=&amp; \epsilon_{j,k-1} u_{j,k-1} + {\left| u_{j,k-1} \right|}^\sigma u_{j,k-1} - \frac{1}{W}\left( u_{j-1,k-1} + u_{j+1,k-1} + u_{j,k-2} + u_{j,k} - 4u_{j,k-1} \right) \\
+\zeta_{j,k+1} &amp;=&amp; \epsilon_{j,k+1} u_{j,k+1} + {\left| u_{j,k+1} \right|}^\sigma u_{j,k+1} - \frac{1}{W}\left( u_{j-1,k+1} + u_{j+1,k+1} + u_{j,k} + u_{j,k+2} - 4u_{j,k+1} \right) \end{aligned}\]</span> And noting the derivative <span class="math display">\[\frac{\partial}{\partial u} {\left| u \right|}^\sigma u = \sigma {\left| u \right|}^{\sigma -1} \frac{\partial {\left| u \right|}}{\partial u} u + {\left| u \right|}^\sigma  = \left(\sigma + 1\right) {\left| u \right|}^\sigma\]</span> We then have <span class="math display">\[\begin{aligned}
+\frac{\partial\zeta_{j,k}}{\partial u_{j,k}} &amp;=&amp; \epsilon_{j,k}  + \left(\sigma +1\right) {\left| u_{j,k} \right|}^\sigma + \frac{4}{W} \\
+\frac{\partial\zeta_{j\pm 1,k}}{\partial u_{j,k}} &amp;=&amp;
+\frac{\partial\zeta_{j,k\pm 1}}{\partial u_{j,k}} = -\frac{1}{W} \end{aligned}\]</span> And finally <span class="math display">\[\partial_t p_{j,k} =
+ - \frac{2}{W} \left( \zeta_{j-1,k} + \zeta_{j+1,k} + \zeta_{j,k-1} + \zeta_{j,k+1} \right)
++
+ 2 \zeta_{j,k} \left( \epsilon_{j,k}  + \left(\sigma +1\right) {\left| u_{j,k} \right|}^\sigma + \frac{4}{W} \right)\]</span> which can be re-written as <span class="math display">\[\partial_t p_{j,k} =
+  2 \Big(\epsilon_{j,k}  + \left(\sigma +1\right) {\left| u_{j,k} \right|}^\sigma \Big) \zeta_{j,k} 
+ - \frac{2}{W} \left( \zeta_{j-1,k} + \zeta_{j+1,k} + \zeta_{j,k-1} + \zeta_{j,k+1} - 4 \zeta_{j,k} \right)\]</span> which is then simply updated <span class="math display">\[p(t+\tau) = p(t) + 2\tau \left[  \Big(\epsilon_{j,k}  + \left(\sigma +1\right) {\left| u_{j,k} \right|}^\sigma \Big) \zeta_{j,k} 
+ - \frac{1}{W}\left( \zeta_{j-1,k} + \zeta_{j+1,k} + \zeta_{j,k-1} + \zeta_{j,k+1} - 4 \zeta_{j,k} \right)\right]\]</span></p>
+<p><span>99</span></p>
+</body>
+</html>
